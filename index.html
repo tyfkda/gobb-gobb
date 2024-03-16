@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />
+        <title>Title</title>
+
+        <!-- CSS -->
+        <style type="text/css">
+            html, body {
+                margin: 0;
+                width: 100%;
+                height: 100%;
+            }
+            body {
+              user-select: none;
+            }
+            .full-size {
+                width: 100%;
+                height: 100%;
+            }
+            .grid {
+                width: 150px;
+                height: 150px;
+                border: 1px solid black;
+            }
+            .cell {
+                margin: auto;
+                border-radius: 50%;
+                cursor: pointer;
+            }
+            .p0 {
+                background-color: #f80;
+            }
+            .p1 {
+                background-color: #0cf;
+            }
+            .unitL {
+                width: 80%;
+                height: 80%;
+            }
+            .unitM {
+                width: 55%;
+                height: 55%;
+            }
+            .unitS {
+                width: 30%;
+                height: 30%;
+            }
+        </style>
+
+        <!-- JS -->
+        <script defer src="main.js"></script>
+        <script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.7/cdn.js" integrity="sha512-RvlcAHDQH6uKcb1vPjIKzztHySEHd0T7gpAMZ/Mg22UjeKMJRlZtTLC2iBoZ3l+CSiW+TGapC6+F4YKZ9PKqVw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    </head>
+    <body>
+        <div class="full-size" x-data="initialData">
+            <noscript>JavaScriptを有効にしてください</noscript>
+
+            <div id="p1units"></div>
+            <table id="board" style="width:min(80vw,80vh); height:min(80vw,80vh); margin:auto">
+                <tr>
+                    <td id="grid00" class="grid"></td>
+                    <td id="grid01" class="grid"></td>
+                    <td id="grid02" class="grid"></td>
+                </tr>
+                <tr>
+                    <td id="grid10" class="grid"></td>
+                    <td id="grid11" class="grid"></td>
+                    <td id="grid12" class="grid"></td>
+                </tr>
+                <tr>
+                    <td id="grid20" class="grid"></td>
+                    <td id="grid21" class="grid"></td>
+                    <td id="grid22" class="grid"></td>
+                </tr>
+            </table>
+            <div id="p0units"></div>
+
+            <div>Turn: <span x-text="turn + 1"></span></div>
+            <template x-if="gameEnded && winner >= 0">
+                <div>Winer: Player <span x-text="winner + 1"></span></div>
+            </template>
+            <template x-if="gameEnded && winner < 0">
+                <div>Draw</div>
+            </template>
+        </div>
+    </body>
+</html>
