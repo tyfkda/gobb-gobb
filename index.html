@@ -14,6 +14,7 @@
             }
             body {
               user-select: none;
+              touch-action: manipulation;
             }
             .full-size {
                 width: 100%;
@@ -47,6 +48,13 @@
                 width: 30%;
                 height: 30%;
             }
+            #board {
+                width:min(80vw,80vh);
+                height:min(80vw,80vh);
+                width:min(80dvw,80dvh);
+                height:min(80dvw,80dvh);
+                margin:auto;
+            }
         </style>
 
         <!-- JS -->
@@ -58,7 +66,7 @@
             <noscript>JavaScriptを有効にしてください</noscript>
 
             <div id="p1units"></div>
-            <table id="board" style="width:min(80vw,80vh); height:min(80vw,80vh); margin:auto">
+            <table id="board">
                 <tr>
                     <td id="grid00" class="grid"></td>
                     <td id="grid01" class="grid"></td>
@@ -84,6 +92,7 @@
             <template x-if="gameEnded && winner < 0">
                 <div>Draw</div>
             </template>
+            <div id="log"></div>
         </div>
     </body>
 </html>

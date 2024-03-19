@@ -125,6 +125,17 @@ function bindGridEvents(func) {
     }
 }
 
+function findGrid(x, y) {
+    for (const gridId of gridIds) {
+        const grid = document.getElementById(gridId)
+        const rect = grid.getBoundingClientRect()
+        if (rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom)
+            return grid
+    }
+    return null
+}
+
+
 function setUnitEventListeners(div, callbacks) {
     if (div.listeners != null) {
         for (const [type, listener] of div.listeners)
@@ -133,13 +144,22 @@ function setUnitEventListeners(div, callbacks) {
     }
 
     const mousedown = (event) => {
-        if (event.button !== 0)
-            return
+        switch (event.type) {
+        case 'mousedown':
+            if (event.button !== 0)
+                return
+            break
+        case 'touchstart':
+            if (event.touches.length !== 1)
+                return
+            break
+        }
         if (!callbacks.canPick(div))
             return
         event.preventDefault()
 
         div.style.opacity = '0.5'
+        callbacks.onDragStart()
 
         let target = null
         const cleanUp = bindGridEvents(function(_event, enter) {
@@ -148,19 +168,28 @@ function setUnitEventListeners(div, callbacks) {
 
         const mouseup = (event) => {
             document.removeEventListener('mouseup', mouseup)
+            document.removeEventListener('touchend', mouseup)
             div.style.opacity = ''
             cleanUp()
 
-            if (target != null) {
-                callbacks.onDropped(div, target)
+            if (event.type === 'touchend') {
+                if (event.changedTouches.length === 1) {
+                    const touch = event.changedTouches[0]
+                    target = findGrid(touch.pageX, touch.pageY)
+                }
             }
+
+            callbacks.onDropped(div, target)
         }
         document.addEventListener('mouseup', mouseup)
+        document.addEventListener('touchend', mouseup)
     }
     div.addEventListener('mousedown', mousedown)
+    div.addEventListener('touchstart', mousedown)
     if (div.listeners == null)
         div.listeners = []
     div.listeners.push(['mousedown', mousedown])
+    div.listeners.push(['touchstart', mousedown])
 }
 
 class Grid {
@@ -192,16 +221,23 @@ class Grid {
 }
 
 class DomApp {
+    dragging = false
+
     constructor() {
         this.gg = new Gobblet()
 
         this.unitCallbacks = {
             canPick: (div) => {
                 const player = parseInt(div.dataset.player)
-                return !this.gg.isGameEndned() && this.gg.turn === player
+                return !this.dragging && !this.gg.isGameEndned() && this.gg.turn === player
             },
+            onDragStart: () => this.dragging = true,
             onDropped: this.onUnitDropped.bind(this),
         }
+
+        window.addEventListener('touchstart', (event) => {
+            event.preventDefault();
+        }, {passive: false})
 
         this.initGrids()
     }
@@ -254,6 +290,10 @@ class DomApp {
     }
 
     onUnitDropped(div, target) {
+        this.dragging = false
+        if (target == null)
+            return
+
         const dstRow = parseInt(target.dataset.row)
         const dstCol = parseInt(target.dataset.col)
         let srcRow = -1
