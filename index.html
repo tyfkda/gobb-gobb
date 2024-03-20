@@ -48,6 +48,9 @@
                 width: 30%;
                 height: 30%;
             }
+            .win {
+                background-color: #cfc;
+            }
             #board {
                 width:min(80vw,80vh);
                 height:min(80vw,80vh);
@@ -58,11 +61,10 @@
         </style>
 
         <!-- JS -->
-        <script defer src="main.js"></script>
-        <script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.7/cdn.js" integrity="sha512-RvlcAHDQH6uKcb1vPjIKzztHySEHd0T7gpAMZ/Mg22UjeKMJRlZtTLC2iBoZ3l+CSiW+TGapC6+F4YKZ9PKqVw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script defer src="main.mjs" type="module"></script>
     </head>
     <body>
-        <div class="full-size" x-data="initialData">
+        <div class="full-size">
             <noscript>JavaScriptを有効にしてください</noscript>
 
             <div id="p1units"></div>
@@ -85,14 +87,8 @@
             </table>
             <div id="p0units"></div>
 
-            <div>Turn: <span x-text="turn + 1"></span></div>
-            <template x-if="gameEnded && winner >= 0">
-                <div>Winer: Player <span x-text="winner + 1"></span></div>
-            </template>
-            <template x-if="gameEnded && winner < 0">
-                <div>Draw</div>
-            </template>
-            <div id="log"></div>
+            <div>Turn: <span id="turn"></span></div>
+            <div id="result"></div>
         </div>
     </body>
 </html>

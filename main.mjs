@@ -26,10 +26,15 @@ class Gobblet {
     }
 
     constructor() {
+        this.reset()
+    }
+
+    reset() {
         this.turn = 0
         this.gameEnded = false
         this.winner = -1
         this.board = [...Array(3)].map(() => [...Array(3)].map(() => []))
+        this.winLine = -1
     }
 
     isGameEndned() {
@@ -68,9 +73,8 @@ class Gobblet {
     }
 
     checkWin() {
-        for (const [srow, scol, drow, dcol] of kLines) {
-            let row = srow
-            let col = scol
+        for (let il = 0; il < kLines.length; ++il) {
+            let [row, col, drow, dcol] = kLines[il]
             let c = this.getCell(row, col)
             if (c < 0)
                 continue
@@ -86,6 +90,7 @@ class Gobblet {
             if (j >= 3) {
                 this.gameEnded = true
                 this.winner = pl
+                this.winLine = il
                 return true
             }
         }
@@ -335,26 +340,42 @@ class DomApp {
         }
         if (this.gg.isGameEndned()) {
             this.appCallbacks.onGameEnded(this.gg.winner)
+            this.#showWinLine()
         } else {
             this.appCallbacks.onMoved()
         }
     }
+
+    #showWinLine() {
+        let [row, col, drow, dcol] = kLines[this.gg.winLine]
+        for (let i = 0; i < 3; ++i) {
+            const grid = this.grids[row * 3 + col]
+            grid.elem.classList.add('win')
+            row += drow
+            col += dcol
+        }
+    }
 }
 
-const initialData = {
-    turn: 0,
-    gameEnded: false,
-    winner: -1,
+window.addEventListener('load', () => {
+    function showTurn(turn) {
+        const span = document.getElementById('turn')
+        span.textContent = `${turn + 1}`
+    }
 
-    init() {
-        this.app = new DomApp()
-        this.app.setCallback({
-            onMoved: () => this.turn = this.app.turn,
-            onGameEnded: (winner) => {
-                this.gameEnded = true
-                this.winner = winner
-            },
-        })
-        this.turn = this.app.turn
-    },
-}
+    const app = new DomApp()
+    app.setCallback({
+        onMoved: () => {
+            showTurn(app.turn)
+        },
+        onGameEnded: (winner) => {
+            const div = document.getElementById('result')
+            if (winner >= 0) {
+                div.textContent = `プレイヤー ${winner + 1} の勝ち！`
+            } else {
+                div.textContent = '引き分け！'
+            }
+        },
+    })
+    showTurn(app.turn)
+})
