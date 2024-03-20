@@ -142,7 +142,7 @@ class DomApp {
             event.preventDefault();
         }, {passive: false})
 
-        this.initGrids()
+        this.reset()
     }
 
     setCallback(appCallbacks) {
@@ -155,19 +155,26 @@ class DomApp {
         this.grids = []
         for (let i = 0; i < gridIds.length; ++i) {
             const elem = document.getElementById(gridIds[i])
+            elem.innerHTML = ''
             const div = document.createElement('div')
             elem.appendChild(div)
 
             const grid = new Grid((i / 3) | 0, i % 3, elem, div)
             this.grids.push(grid)
+
+            grid.elem.classList.remove('win')
         }
 
         for (let player = 0; player < 2; ++player)
             this.createUnits(player)
+
+        const result = document.getElementById('result')
+        result.innerHTML = ''
     }
 
     createUnits(player) {
         const parent = document.getElementById(`p${player}units`)
+        parent.innerHTML = ''
         const sizeTable = ['40px', '60px', '80px']
         for (let i = 0; i < 3; ++i) {
             for (let j = 0; j < 2; ++j) {
@@ -190,6 +197,11 @@ class DomApp {
         div.dataset.free = true
         setUnitEventListeners(div, this.unitCallbacks)
         return div
+    }
+
+    reset() {
+        this.gg.reset()
+        this.initGrids()
     }
 
     onUnitDropped(div, target) {
@@ -237,10 +249,20 @@ class DomApp {
 
         }
         if (this.gg.isGameEndned()) {
-            this.appCallbacks.onGameEnded(this.gg.winner)
+            this.#showResult()
             this.#showWinLine()
         } else {
             this.appCallbacks.onMoved()
+        }
+    }
+
+    #showResult() {
+        const winner = this.gg.winner
+        const div = document.getElementById('result')
+        if (winner >= 0) {
+            div.textContent = `プレイヤー ${winner + 1} の勝ち！`
+        } else {
+            div.textContent = '引き分け！'
         }
     }
 
@@ -266,14 +288,12 @@ window.addEventListener('load', () => {
         onMoved: () => {
             showTurn(app.turn)
         },
-        onGameEnded: (winner) => {
-            const div = document.getElementById('result')
-            if (winner >= 0) {
-                div.textContent = `プレイヤー ${winner + 1} の勝ち！`
-            } else {
-                div.textContent = '引き分け！'
-            }
-        },
     })
     showTurn(app.turn)
+
+    const resetButton = document.getElementById('reset')
+    resetButton.addEventListener('click', () => {
+        app.reset()
+        showTurn(app.turn)
+    })
 })
